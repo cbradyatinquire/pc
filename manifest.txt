@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Extension-Name: pc
+Class-Manager: pc.ProcedureCallerExtension
+NetLogo-Extension-API-Version: 5.0
