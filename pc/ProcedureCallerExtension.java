@@ -2,6 +2,9 @@ package pc;
 
 import java.util.Map;
 
+import javax.swing.SwingUtilities;
+
+import org.nlogo.agent.Observer;
 import org.nlogo.api.Argument;
 import org.nlogo.api.CompilerException;
 import org.nlogo.api.Context;
@@ -12,21 +15,24 @@ import org.nlogo.api.ExtensionException;
 import org.nlogo.api.LogoException;
 import org.nlogo.api.LogoListBuilder;
 import org.nlogo.api.PrimitiveManager;
+import org.nlogo.api.SimpleJobOwner;
 import org.nlogo.api.Syntax;
 import org.nlogo.app.App;
+import org.nlogo.nvm.ExtensionContext;
 import org.nlogo.nvm.Procedure;
 import org.nlogo.nvm.Workspace;
+import org.nlogo.workspace.AbstractWorkspace;
 
 public class ProcedureCallerExtension extends DefaultClassManager {
 
 	@Override
 	public void load(PrimitiveManager pm) throws ExtensionException {
-
 		pm.addPrimitive( "run-all", new RunAll() );
 		pm.addPrimitive( "list-all", new ListAll() );
 	}
 
 	
+
 	public static class RunAll extends DefaultCommand {
 
 		@Override
@@ -45,7 +51,8 @@ public class ProcedureCallerExtension extends DefaultClassManager {
 				throws ExtensionException, LogoException {
 			String prefix = args[0].getString().toUpperCase();
 			
-			Workspace ws = App.app().workspace();
+			final ExtensionContext ec = ((ExtensionContext)context);
+			Workspace ws = ec.workspace();
 			Map<String,Procedure> pMap = ws.getProcedures();
 			for ( String procedureName :  pMap.keySet() ) {
 				if ( procedureName.startsWith(prefix) ) {
@@ -60,11 +67,10 @@ public class ProcedureCallerExtension extends DefaultClassManager {
 					}
 				}
 			}
-			
-			
 		}
 		
 	}
+
 	
 	public static class ListAll extends DefaultReporter {
 
@@ -82,18 +88,20 @@ public class ProcedureCallerExtension extends DefaultClassManager {
 			
 			String prefix = args[0].getString().toUpperCase();
 			
-			Workspace ws = App.app().workspace();
-			Map<String,Procedure> pMap = ws.getProcedures();
+			
+			ExtensionContext ec = ((ExtensionContext)context);
+			Workspace ws = ec.workspace();
+			Map<String,Procedure> pMap = ws.getProcedures();			
 			LogoListBuilder llb = new LogoListBuilder();
+						
 			for ( String procedureName :  pMap.keySet() ) {
-				Procedure p = pMap.get(procedureName);
-				if (p.usableBy.contains("O") && p.args.isEmpty() && p.tyype.toString().equalsIgnoreCase("command") ) {
-					if ( procedureName.startsWith(prefix) ) {
+				if ( procedureName.startsWith(prefix) ) {
+					Procedure p = pMap.get(procedureName);
+					if (p.usableBy.contains("O") && p.args.isEmpty() && p.tyype.toString().equalsIgnoreCase("command") ) {
 						llb.add(procedureName);
 					}
 				}
 			}
-			
 			return llb.toLogoList();
 		}
 
