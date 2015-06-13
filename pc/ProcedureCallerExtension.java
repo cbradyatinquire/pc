@@ -27,7 +27,7 @@ public class ProcedureCallerExtension extends DefaultClassManager {
 
 	@Override
 	public void load(PrimitiveManager pm) throws ExtensionException {
-		pm.addPrimitive( "run-all", new RunAll() );
+		//pm.addPrimitive( "run-all", new RunAll() );
 		pm.addPrimitive( "list-all", new ListAll() );
 	}
 
